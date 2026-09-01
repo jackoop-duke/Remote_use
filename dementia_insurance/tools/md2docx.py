@@ -32,10 +32,13 @@ def add_inline(par, text, size=None, bold_all=False):
         elif p.startswith('`') and p.endswith('`'):
             r = par.add_run(p[1:-1]); r.font.name = 'Consolas'
         elif p.startswith('['):
-            m = re.match(r'\[([^\]]+)\]\(([^)]+)\)', p)
-            r = par.add_run(m.group(1)); r.underline = True; r.font.color.rgb = RGBColor(0x1F, 0x4E, 0x79)
-            if m.group(2) != m.group(1):
-                r2 = par.add_run(f' <{m.group(2)}>'); r2.font.size = Pt(8); r2.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
+            m = re.match(r'\[([^\]]+)\]\(([^)]+)\)$', p)
+            if not m:
+                r = par.add_run(p)
+            else:
+                r = par.add_run(m.group(1)); r.underline = True; r.font.color.rgb = RGBColor(0x1F, 0x4E, 0x79)
+                if m.group(2) != m.group(1):
+                    r2 = par.add_run(f' <{m.group(2)}>'); r2.font.size = Pt(8); r2.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
         else:
             r = par.add_run(p)
         if bold_all: r.bold = True
