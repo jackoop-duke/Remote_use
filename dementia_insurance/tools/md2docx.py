@@ -39,13 +39,15 @@ def add_inline(par, text, size=None, bold_all=False):
             else:
                 r = par.add_run(m.group(1)); r.underline = True; r.font.color.rgb = RGBColor(0x1F, 0x4E, 0x79)
                 if m.group(2) != m.group(1):
-                    r2 = par.add_run(f' <{m.group(2)}>'); r2.font.size = Pt(8); r2.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
+                    r2 = par.add_run(f' <{m.group(2)}>'); r2.font.size = Pt(TABLE_PT); r2.font.color.rgb = RGBColor(0x59, 0x59, 0x59)
         else:
             r = par.add_run(p)
         if bold_all: r.bold = True
         if size: r.font.size = Pt(size)
 
-WIDE_TABLE_COLS = 9  # tables with this many columns or more are placed on a landscape page
+BODY_PT = 12    # body text (Jack's rule: never below 12pt)
+TABLE_PT = 10   # table text (never below 10pt)
+WIDE_TABLE_COLS = 8  # a level-2 section containing a table this wide is rendered in landscape
 
 def table_cols(line):
     return len(line.strip().strip('|').split('|')) if line.strip().startswith('|') else 0
@@ -56,14 +58,11 @@ def set_orientation(sec, landscape):
         sec.page_width, sec.page_height = h, w
     sec.orientation = WD_ORIENT.LANDSCAPE if landscape else WD_ORIENT.PORTRAIT
 
-def flush_table(doc, rows, already_landscape=False):
+def flush_table(doc, rows):
     rows = [r for r in rows if not re.match(r'^\s*\|?\s*:?-{2,}', r)]
     cells = [[c.strip() for c in r.strip().strip('|').split('|')] for r in rows]
     if not cells: return
     ncol = max(len(r) for r in cells)
-    wide = ncol >= WIDE_TABLE_COLS
-    if wide and not already_landscape:
-        set_orientation(doc.add_section(WD_SECTION.NEW_PAGE), True)
     t = doc.add_table(rows=len(cells), cols=ncol)
     t.style = 'Table Grid'; t.alignment = WD_TABLE_ALIGNMENT.CENTER
     for i, row in enumerate(cells):
@@ -71,19 +70,19 @@ def flush_table(doc, rows, already_landscape=False):
             txt = row[j] if j < len(row) else ''
             cell = t.cell(i, j); cell.text = ''
             par = cell.paragraphs[0]
-            add_inline(par, txt.replace('<br>', '\n'), size=8, bold_all=(i == 0))
+            add_inline(par, txt.replace('<br>', '\n'), size=TABLE_PT, bold_all=(i == 0))
             if i == 0: set_cell_shade(cell, 'D9E2F3')
     doc.add_paragraph()
-    if wide:
-        set_orientation(doc.add_section(WD_SECTION.NEW_PAGE), False)
 
 def main(src, dst):
     doc = Document()
-    st = doc.styles['Normal']; st.font.name = 'Yu Gothic'; st.font.size = Pt(10.5)
+    st = doc.styles['Normal']; st.font.name = 'Yu Gothic'; st.font.size = Pt(BODY_PT)
     st.element.rPr.rFonts.set(qn('w:eastAsia'), 'Yu Gothic')
-    for s in ['Heading 1', 'Heading 2', 'Heading 3', 'Heading 4']:
-        doc.styles[s].font.name = 'Yu Gothic'
+    for s, sz in [('Title', 22), ('Heading 1', 18), ('Heading 2', 16), ('Heading 3', 14), ('Heading 4', 13)]:
+        doc.styles[s].font.name = 'Yu Gothic'; doc.styles[s].font.size = Pt(sz)
         doc.styles[s].element.rPr.rFonts.set(qn('w:eastAsia'), 'Yu Gothic')
+    for s in ['List Bullet', 'List Bullet 2', 'List Number']:
+        doc.styles[s].font.size = Pt(BODY_PT)
     for sec in doc.sections:
         sec.left_margin = sec.right_margin = Cm(2.0); sec.top_margin = sec.bottom_margin = Cm(2.0)
     lines = open(src, encoding='utf-8').read().splitlines()
@@ -93,20 +92,24 @@ def main(src, dst):
         if line.strip().startswith('|'):
             table_buf.append(line); i += 1; continue
         if table_buf:
-            flush_table(doc, table_buf, already_landscape=in_landscape); table_buf = []; in_landscape = False
+            flush_table(doc, table_buf); table_buf = []
         s = line.rstrip()
         if not s.strip():
             i += 1; continue
         m = re.match(r'^(#{1,4})\s+(.*)', s)
         if m:
             lvl = len(m.group(1)); text = m.group(2).strip()
-            # look ahead: if a wide table follows this heading (before the next heading), start the
-            # landscape section here so the heading stays on the same page as its table
-            if not in_landscape:
+            # at every level-2 heading decide the orientation of the whole section: landscape when it
+            # contains any wide table (keeps columns readable at TABLE_PT), portrait otherwise
+            if lvl == 2:
+                wide = False
                 for la in lines[i+1:]:
-                    if re.match(r'^#{1,4}\s', la): break
-                    if table_cols(la) >= WIDE_TABLE_COLS:
-                        set_orientation(doc.add_section(WD_SECTION.NEW_PAGE), True); in_landscape = True; break
+                    if re.match(r'^##\s', la): break
+                    if table_cols(la) >= WIDE_TABLE_COLS: wide = True; break
+                if wide != in_landscape:
+                    sec = doc.add_section(WD_SECTION.NEW_PAGE); set_orientation(sec, wide)
+                    sec.left_margin = sec.right_margin = Cm(1.5 if wide else 2.0)
+                    in_landscape = wide
             if lvl == 1 and first_h1:
                 p = doc.add_heading(level=0); add_inline(p, text); first_h1 = False
             else:
@@ -129,7 +132,7 @@ def main(src, dst):
             i += 1; buf.append(lines[i].rstrip())
         p = doc.add_paragraph(); add_inline(p, ' '.join(buf)); p.paragraph_format.space_after = Pt(6)
         i += 1
-    if table_buf: flush_table(doc, table_buf, already_landscape=in_landscape)
+    if table_buf: flush_table(doc, table_buf)
     doc.save(dst)
 
 if __name__ == '__main__':
