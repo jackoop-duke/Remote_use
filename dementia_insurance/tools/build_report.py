@@ -36,7 +36,7 @@ def repl(m):
         order.append(key); num[key] = len(order)
     return f'[{num[key]}]'
 out = re.sub(r'\[(W1|W2b|W2|W3|W4|W5|V)-R(\d+)\]', repl, draft)
-bib = ['', '## 參考文獻（Reference）', '', '以下編號對應內文之 [n]。「WP-n」為原始調查工單代號，「V」為主代理複核紀錄。所有來源查閱日均為 2026-09-01；受環境限制，URL 之網頁全文未能開啟，僅依搜尋引擎回傳之標題、網址與摘要確認。', '']
+bib = ['', '## 參考文獻（Reference）', '', '以下編號對應內文之 [n]。「WP-n」為原始調查工單代號，「V」為主代理複核紀錄。各條目末之查閱日：2026-09-01 為第一階段（受環境限制僅依搜尋引擎回傳之標題、網址與摘要確認）；2026-09-03 為第二階段（已開啟網頁或 PDF 全文確認）。', '']
 for i, key in enumerate(order, 1):
     bib.append(f'[{i}] {sources[key[0]][key[1]]}　（{key[0].replace("W","WP-")}-R{key[1]}）')
 out = out.rstrip() + '\n' + '\n'.join(bib) + '\n'

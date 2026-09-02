@@ -9,6 +9,7 @@ from docx import Document
 from docx.shared import Pt, Cm, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.section import WD_ORIENT, WD_SECTION
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
@@ -44,11 +45,25 @@ def add_inline(par, text, size=None, bold_all=False):
         if bold_all: r.bold = True
         if size: r.font.size = Pt(size)
 
-def flush_table(doc, rows):
+WIDE_TABLE_COLS = 9  # tables with this many columns or more are placed on a landscape page
+
+def table_cols(line):
+    return len(line.strip().strip('|').split('|')) if line.strip().startswith('|') else 0
+
+def set_orientation(sec, landscape):
+    w, h = sec.page_width, sec.page_height
+    if landscape and w < h or (not landscape and w > h):
+        sec.page_width, sec.page_height = h, w
+    sec.orientation = WD_ORIENT.LANDSCAPE if landscape else WD_ORIENT.PORTRAIT
+
+def flush_table(doc, rows, already_landscape=False):
     rows = [r for r in rows if not re.match(r'^\s*\|?\s*:?-{2,}', r)]
     cells = [[c.strip() for c in r.strip().strip('|').split('|')] for r in rows]
     if not cells: return
     ncol = max(len(r) for r in cells)
+    wide = ncol >= WIDE_TABLE_COLS
+    if wide and not already_landscape:
+        set_orientation(doc.add_section(WD_SECTION.NEW_PAGE), True)
     t = doc.add_table(rows=len(cells), cols=ncol)
     t.style = 'Table Grid'; t.alignment = WD_TABLE_ALIGNMENT.CENTER
     for i, row in enumerate(cells):
@@ -59,6 +74,8 @@ def flush_table(doc, rows):
             add_inline(par, txt.replace('<br>', '\n'), size=8, bold_all=(i == 0))
             if i == 0: set_cell_shade(cell, 'D9E2F3')
     doc.add_paragraph()
+    if wide:
+        set_orientation(doc.add_section(WD_SECTION.NEW_PAGE), False)
 
 def main(src, dst):
     doc = Document()
@@ -70,19 +87,26 @@ def main(src, dst):
     for sec in doc.sections:
         sec.left_margin = sec.right_margin = Cm(2.0); sec.top_margin = sec.bottom_margin = Cm(2.0)
     lines = open(src, encoding='utf-8').read().splitlines()
-    table_buf = []; i = 0; first_h1 = True
+    table_buf = []; i = 0; first_h1 = True; in_landscape = False
     while i < len(lines):
         line = lines[i]
         if line.strip().startswith('|'):
             table_buf.append(line); i += 1; continue
         if table_buf:
-            flush_table(doc, table_buf); table_buf = []
+            flush_table(doc, table_buf, already_landscape=in_landscape); table_buf = []; in_landscape = False
         s = line.rstrip()
         if not s.strip():
             i += 1; continue
         m = re.match(r'^(#{1,4})\s+(.*)', s)
         if m:
             lvl = len(m.group(1)); text = m.group(2).strip()
+            # look ahead: if a wide table follows this heading (before the next heading), start the
+            # landscape section here so the heading stays on the same page as its table
+            if not in_landscape:
+                for la in lines[i+1:]:
+                    if re.match(r'^#{1,4}\s', la): break
+                    if table_cols(la) >= WIDE_TABLE_COLS:
+                        set_orientation(doc.add_section(WD_SECTION.NEW_PAGE), True); in_landscape = True; break
             if lvl == 1 and first_h1:
                 p = doc.add_heading(level=0); add_inline(p, text); first_h1 = False
             else:
@@ -105,7 +129,7 @@ def main(src, dst):
             i += 1; buf.append(lines[i].rstrip())
         p = doc.add_paragraph(); add_inline(p, ' '.join(buf)); p.paragraph_format.space_after = Pt(6)
         i += 1
-    if table_buf: flush_table(doc, table_buf)
+    if table_buf: flush_table(doc, table_buf, already_landscape=in_landscape)
     doc.save(dst)
 
 if __name__ == '__main__':
