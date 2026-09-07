@@ -4,7 +4,11 @@
 
 ## 第一優先：財新（原文全文，決定「4 家名單」「首次」「預期」的定義）
 
-- 財新原文的專屬網址**未能定位**。請到財新金融頻道 https://finance.caixin.com/ 找 2026-09-06 17:37 吳雨儉〈财政部首次注资险企 4家获670亿元〉，或在 https://www.caixin.com/ 站內搜尋標題。
+- 財新原文（9/7 已定位，更新版）：https://finance.caixin.com/2026-09-06/102482419.html 〈财政部首次注资险企 5家获700亿元（更新）〉
+- 財新同日銀行篇：https://finance.caixin.com/2026-09-06/102482427.html 〈第二批特别国债注资银行落地 农行、工行、进出口行合计2300亿元〉
+- 財新 2 月：https://finance.caixin.com/2026-02-03/102411065.html 〈大型险企将获特别国债千亿注资？影响几何？〉
+- 使用者提供、被封鎖的新浪深度文（9/7）：https://finance.sina.com.cn/wm/2026-09-07/doc-iniqyeui0600986.shtml
+- 專家解讀：https://news.bjd.com.cn/2026/09/06/11948229.shtml （京報網，田利輝）；https://www.bbtnews.com.cn/2026/0906/604902.shtml （北京商報）；https://www.sfccn.com/2026/9-6/zOMDE0MDZfMjIzMjkzOA.html （南方財經）；https://m.thepaper.cn/newsDetail_forward_34020288 （澎湃）；https://www.nbd.com.cn/articles/2026-09-06/4574087.html （每經）
 - 財新英文版（2 月的預告報導）：https://www.caixinglobal.com/2026-02-04/beijing-eyes-fresh-capital-for-big-insurers-as-yield-rules-bite-102411149.html
 - 財新 2023 年太平注資（判斷「首次」定義用）：https://finance.caixin.com/2023-08-10/102091655.html
 
