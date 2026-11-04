@@ -14,6 +14,10 @@ FILES = {
     'W4': 'findings/WP-4_online_new.md',
     'W5': 'findings/WP-5_market_special.md',
     'V': 'findings/V_verification.md',
+    'P1': 'findings/P3-1_domestic.md',
+    'P2': 'findings/P3-2_pc_bank_online.md',
+    'P3': 'findings/P3-3_foreign.md',
+    'P4': 'findings/P3-4_market.md',
 }
 def load_sources(path):
     txt = open(path, encoding='utf-8').read()
@@ -35,7 +39,7 @@ def repl(m):
             sys.stderr.write(f'WARNING unresolved {key}\n'); return m.group(0)
         order.append(key); num[key] = len(order)
     return f'[{num[key]}]'
-out = re.sub(r'\[(W1|W2b|W2|W3|W4|W5|V)-R(\d+)\]', repl, draft)
+out = re.sub(r'\[(W1|W2b|W2|W3|W4|W5|V|P1|P2|P3|P4)-R(\d+)\]', repl, draft)
 bib = ['', '## 參考文獻（Reference）', '', '以下編號對應內文之 [n]。「WP-n」為原始調查工單代號，「V」為主代理複核紀錄。各條目末之查閱日：2026-09-01 為第一階段（受環境限制僅依搜尋引擎回傳之標題、網址與摘要確認）；2026-09-03 為第二階段（已開啟網頁或 PDF 全文確認）。', '']
 for i, key in enumerate(order, 1):
     bib.append(f'[{i}] {sources[key[0]][key[1]]}　（{key[0].replace("W","WP-")}-R{key[1]}）')
