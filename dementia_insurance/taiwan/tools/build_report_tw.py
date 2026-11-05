@@ -10,6 +10,7 @@ FILES = {
     'TW1': 'findings/TW-1_major.md',
     'TW2': 'findings/TW-2_mid_foreign.md',
     'TW3': 'findings/TW-3_market.md',
+    'TW4': 'findings/TW-4_contract_pc.md',
     'TV': 'findings/TV_verification.md',
     'W1': '../findings/WP-1_major_domestic.md',
     'W2': '../findings/WP-2_midtier_pc.md',
@@ -43,7 +44,7 @@ def repl(m):
             sys.stderr.write(f'WARNING unresolved {key}\n'); return m.group(0)
         order.append(key); num[key] = len(order)
     return f'[{num[key]}]'
-out = re.sub(r'\[(TW1|TW2|TW3|TV|W1|W2b|W2|W3|W4|W5|V|P1|P2|P3|P4)-R(\d+)\]', repl, draft)
+out = re.sub(r'\[(TW1|TW2|TW3|TW4|TV|W1|W2b|W2|W3|W4|W5|V|P1|P2|P3|P4)-R(\d+)\]', repl, draft)
 def tag(k):
     if k.startswith('TW'): return 'TW-'+k[2:]
     if k=='TV': return 'TV'
