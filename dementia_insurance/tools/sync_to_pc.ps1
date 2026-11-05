@@ -33,6 +33,15 @@ Copy-Item (Join-Path $src "report.docx")       $dest -Force
 Copy-Item (Join-Path $src "report.md")         $dest -Force
 Copy-Item (Join-Path $src "research_plan.md")  $dest -Force
 Copy-Item (Join-Path $src "findings")          $dest -Recurse -Force
+$twSrc  = Join-Path $src "taiwan"
+$twDest = Join-Path $dest "taiwan"
+if (Test-Path $twSrc) {
+  New-Item -ItemType Directory -Force -Path $twDest | Out-Null
+  Copy-Item (Join-Path $twSrc "report_tw.docx")       $twDest -Force
+  Copy-Item (Join-Path $twSrc "report_tw.md")         $twDest -Force
+  Copy-Item (Join-Path $twSrc "research_plan_tw.md")  $twDest -Force
+  Copy-Item (Join-Path $twSrc "findings")             $twDest -Recurse -Force
+}
 
 Write-Host ""
 Write-Host "完成。"

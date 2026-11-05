@@ -50,3 +50,9 @@ A 認知症專屬主契約／B 認知症專屬特約／C 介護保障型含認�
 - 每個階段完成後 commit、push 到同一分支，並執行 `tools\sync_to_pc.ps1` 同步成果到 OneDrive。
 
 請先讀 `research_plan.md`、`report.md` 第一部與第十部、`findings\V_verification.md`，用 10 行以內告訴我你掌握的現況，然後等我的指示。
+
+## 台灣比較（2026-11-05 新增）
+- 位置：`dementia_insurance\taiwan\`；報告 `report_tw.md`／`report_tw.docx`，工單 `findings\TW-1～TW-4`、主筆複核 `findings\TV_verification.md`。
+- 重建：`python tools\build_report_tw.py report_tw_draft.md report_tw.md` → `python tools\md2docx.py report_tw.md report_tw.docx`（在 taiwan 資料夾執行；可同時引用日本報告來源代碼）。
+- 結論：壽險公會 20 家中 18 家有失智相關給付（長照示範條款 CDR≥2）；專屬商品 8 家；CDR 1 輕度給付 5 家；無 MCI 給付；85 份條款 0 份有指定代理請求，唯宏泰友溢健康有意定監護條款。
+- 待辦：保發中心資料庫需人工輸入驗證碼對帳；友邦憶起守護等 4 項條款未取得；示範條款官方現行全文。
